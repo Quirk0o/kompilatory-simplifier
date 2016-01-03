@@ -71,6 +71,19 @@ case class BinExpr(op: String, left: Node, right: Node) extends Node {
         }
         leftStr + " " + op + " " + rightStr
     }
+
+    override def equals(obj: scala.Any): Boolean = obj match {
+        case BinExpr(o, l, r) =>
+            if (op != o)
+                false
+            else o match {
+                case "+" | "-" | "*" =>
+                    left.equals(l) && right.equals(r) ||
+                    left.equals(r) && right.equals(l)
+                case _ => left.equals(l) && right.equals(r)
+            }
+        case _ => false
+    }
 }
 
 case class IfElseExpr(cond: Node, left: Node, right: Node) extends Node {
