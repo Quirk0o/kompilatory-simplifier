@@ -18,23 +18,21 @@ sealed abstract class Node {
     val indent = " " * 4
 }
 
-case class IntNum(value: Integer) extends Node {
+sealed abstract class Const[T](value: T) extends Node {
     override def toStr = value.toString
 }
 
-case class FloatNum(value: Double) extends Node {
-    override def toStr = value.toString
-}
+case class IntNum(value: Integer) extends Const[Integer](value)
 
-case class StringConst(value: String) extends Node {
-    override def toStr = value
-}
+case class FloatNum(value: Double) extends Const[Double](value)
 
-case class TrueConst() extends Node {
+case class StringConst(value: String) extends Const[String](value)
+
+case class TrueConst() extends Const[Boolean](true) {
     override def toStr = "True"
 }
 
-case class FalseConst() extends Node {
+case class FalseConst() extends Const[Boolean](false) {
     override def toStr = "False"
 }
 
