@@ -137,13 +137,21 @@ class Parser extends JavaTokenParsers {
   def primary: Parser[Node] = (
     lvalue
       | const
-      | "("~>expression<~")"
-      | "["~>expr_list_comma<~"]" ^^ { 
-          case NodeList(x) => ElemList(x)
-          case l => { println("Warn: expr_list_comma didn't return NodeList"); l }
-         }
-      | "{"~>key_datum_list<~"}"
-  )
+      | "(" ~> expression <~ ")"
+      | "(" ~> expr_list_comma <~ ")" ^^ {
+        case NodeList(x) => Tuple(x)
+        case l =>
+          println("Warn: expr_list_comma didn't return NodeList")
+          l
+      }
+      | "[" ~> expr_list_comma <~ "]" ^^ {
+        case NodeList(x) => ElemList(x)
+        case l =>
+          println("Warn: expr_list_comma didn't return NodeList")
+          l
+      }
+      | "{" ~> key_datum_list <~ "}"
+    )
 
 
   def lvalue: Parser[Node] = id ~ trailer ^^ {
