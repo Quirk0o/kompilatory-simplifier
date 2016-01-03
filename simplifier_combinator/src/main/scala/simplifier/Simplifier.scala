@@ -7,6 +7,9 @@ import AST._
 // take into account non-greedy strategies to resolve cases with power laws
 object Simplifier {
 
-  def simplify(node: Node) = node
+  def simplify(node: Node): Node = node match {
+    case NodeList(list) => NodeList(list.map(simplify))
+    case _ => node
+  }
 
 }
