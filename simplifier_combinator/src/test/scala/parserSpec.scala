@@ -81,6 +81,7 @@ class parserSpec extends Specification {
 
     "evaluate constants" in {
       parseString("2+3*5") mustEqual parseString("17")
+      parseString("2+3.0*5.0") mustEqual parseString("17.0")
       parseString("not False") mustEqual parseString("True")
       parseString("not True") mustEqual parseString("False")
     }
