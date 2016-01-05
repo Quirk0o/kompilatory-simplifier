@@ -28,13 +28,14 @@ case class FloatNum(value: Double) extends Const[Double](value)
 
 case class StringConst(value: String) extends Const[String](value)
 
-case class TrueConst() extends Const[Boolean](true) {
-    override def toStr = "True"
+sealed abstract class BoolConst(value: Boolean) extends Const[Boolean](value) {
+    override def toStr = value.toString.capitalize
 }
 
-case class FalseConst() extends Const[Boolean](false) {
-    override def toStr = "False"
-}
+case class TrueConst() extends BoolConst(true)
+
+case class FalseConst() extends BoolConst(false)
+
 
 case class Variable(name: String) extends Node {
     override def toStr = name
