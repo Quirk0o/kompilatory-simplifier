@@ -55,6 +55,10 @@ case class Unary(op: String, expr: Node) extends Node {
 
 }
 
+object BinExpr {
+    val commutative = List("+", "*", "or", "and")
+}
+
 case class BinExpr(op: String, left: Node, right: Node) extends Node {
 
     override def toStr = {
@@ -77,12 +81,10 @@ case class BinExpr(op: String, left: Node, right: Node) extends Node {
         case BinExpr(o, l, r) =>
             if (op != o)
                 false
-            else o match {
-                case "+" | "-" | "*" =>
-                    left.equals(l) && right.equals(r) ||
-                    left.equals(r) && right.equals(l)
-                case _ => left.equals(l) && right.equals(r)
-            }
+            else if (BinExpr.commutative.contains(op))
+                left.equals(l) && right.equals(r) || left.equals(r) && right.equals(l)
+            else
+                left.equals(l) && right.equals(r)
         case _ => false
     }
 }
