@@ -5,10 +5,11 @@ import AST._
 
 class Parser extends JavaTokenParsers {
 
-  val precedenceList: List[List[String]] = List( 
-      List("is", ">=", "<=", "==", "!=", "<", ">"), // order matters also within inner list, longer op should go before shorter one, e.g. "<=" before "<", if one is a prefix of another
-      List("+", "-"),
-      List("*", "/", "%")
+  val precedenceList: List[List[String]] = List(
+    List("is", ">=", "<=", "==", "!=", "<", ">"), // order matters also within inner list, longer op should go before shorter one, e.g. "<=" before "<", if one is a prefix of another
+    List("+", "-"),
+    List("*", "/", "%"),
+    List("**")
   )
 
   val minPrec = 0
@@ -110,10 +111,9 @@ class Parser extends JavaTokenParsers {
   }
 
 
-  def binary(level: Int): Parser[Node] = (
-      if (level>maxPrec) unary
-      else chainl1( binary(level+1), binaryOp(level) ) // equivalent to binary(level+1) * binaryOp(level)
-  )
+  def binary(level: Int): Parser[Node] =
+    if (level > maxPrec) unary
+    else chainl1(binary(level + 1), binaryOp(level))
 
   // operator precedence parsing takes place here
   def binaryOp(level: Int): Parser[((Node, Node) => BinExpr)] = {
