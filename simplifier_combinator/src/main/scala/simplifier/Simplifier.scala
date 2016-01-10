@@ -351,49 +351,29 @@ object Simplifier {
             else simple
           case _ => chooseStrategy(BinExpr(e.op, e.left, e.right))
         }
-//            checkCommutativity(e)
 
-//      if (op == "+" || op == "-") {
-        left match {
-          case e @ BinExpr(o, x, y) if Priority.binary(o) <= Priority.binary(op) =>
-            val subR = BinExpr(op, x, right)
-            val simpleR = getOrEmpty(checkCommutativity(subR))
-            if (!simpleR.equals(subR))
-              checkCommutativity(BinExpr(o, simpleR, y))
-            else {
-              val subL = BinExpr(op, Unary(o, y), right)
-              val simpleL = getOrEmpty(checkCommutativity(subL))
-              if (!simpleL.equals(subL))
-                checkCommutativity(BinExpr("+", x, simpleL))
-              else
-                checkCommutativity(f)
-            }
-          case _ => checkCommutativity(f)
-        }
-//      }
-//      else
-//        checkCommutativity(f)
-    }
-
-      def countLevels(e: BinExpr) = {
-        def count(acc: Int, e: Node): Int = e match {
-          case f @ BinExpr(_, _, _) => count(acc + 1, f)
-          case _ => acc + 1
-        }
-        count(count(0, e.left), e.right)
+      val simple = checkCommutativity(f)
+      getOrEmpty(simple) match {
+        case BinExpr(op, left, right) =>
+          left match {
+            case e @ BinExpr(o, x, y) if Priority.binary(o) <= Priority.binary(op) =>
+              val subR = BinExpr(op, x, right)
+              val simpleR = getOrEmpty(checkCommutativity(subR))
+              if (!simpleR.equals(subR))
+                checkCommutativity(BinExpr(o, simpleR, y))
+              else {
+                val subL = BinExpr(op, Unary(o, y), right)
+                val simpleL = getOrEmpty(checkCommutativity(subL))
+                if (!simpleL.equals(subL))
+                  checkCommutativity(BinExpr("+", x, simpleL))
+                else
+                  simple
+              }
+            case _ => simple
+          }
+        case _ => simple
       }
-      //      e.left match {
-      //        case f @ BinExpr(o, x, y) if Priority.binary(o) <= Priority.binary(op) =>
-      //          val repNode = o match {
-      //            case "-" => Unary("-", e.right)
-      //            case _ => e.right
-      //          }
-      //          val subR = BinExpr(o, BinExpr(op, x, e.right), y)
-      //          val subL = BinExpr(o, BinExpr(op, repNode, y), x)
-      //          checkCommutativity(e)
-      //          checkCommutativity(subR)
-      //          checkCommutativity(subL)
-      //      }
+    }
 
 
     def reverse(e: BinExpr): BinExpr = e match {
