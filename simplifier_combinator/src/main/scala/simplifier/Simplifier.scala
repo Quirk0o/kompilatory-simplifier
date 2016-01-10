@@ -231,8 +231,18 @@ object Simplifier {
           simplifyNode(BinExpr("*", r1, BinExpr(op, l1, l2)))
         case ("*" | "/", x, IntNum(n)) if n == 1 => Some(x)
         case ("*", IntNum(n), x) if n == 0 => Some(IntNum(0))
+        case ("**", x, IntNum(n)) if n == 0 => Some(IntNum(1))
+        case ("**", x, IntNum(n)) if n == 1 => Some(x)
+        // Simplify power laws
+        case ("**", BinExpr("**", x, n), m) => simplifyNode(BinExpr("**", x, BinExpr("*", n, m)))
         case ("*", BinExpr("**", x1, y), BinExpr("**", x2, z))
           if x1.equals(x2) => Some(BinExpr("**", x1, simplifyNode(BinExpr("+", y, z)).get))
+        case ("+", BinExpr("+",
+            BinExpr("**", x1, IntNum(a)),
+            BinExpr("*", BinExpr("*", IntNum(b), x2), y1)),
+          BinExpr("**", y2, IntNum(c)))
+          if x1.equals(x2) && y1.equals(y2) && a == b && b == c && c == 2 =>
+            simplifyNode(BinExpr("**", BinExpr("+", x1, y1), IntNum(2)))
         case ("/", x, y) if x.equals(y) => Some(IntNum(1))
         case ("/", left, BinExpr("/", x, y))
           if left.equals(x) => simplifyNode(y)
@@ -336,7 +346,7 @@ object Simplifier {
           case BinExpr(_, (IntNum(_) | FloatNum(_)), (IntNum(_) | FloatNum(_))) => Some(calculateExpr(f.op, f.left, f.right))
           case BinExpr("+", t1 @ Tuple(_), t2 @ Tuple(_)) => Some(concatTuples(t1, t2))
           case BinExpr("+", l1 @ ElemList(_), l2 @ ElemList(_)) => Some(concatLists(l1, l2))
-          case BinExpr("+" | "-" | "*" | "/", _, _) => simplifyArithmeticExpr(f.op, f.left, f.right)
+          case BinExpr("+" | "-" | "*" | "/" | "**", _, _) => simplifyArithmeticExpr(f.op, f.left, f.right)
           case BinExpr("or" | "and", _, _) => Some(simplifyBooleanExpr(f.op, f.left, f.right))
           case BinExpr(">=" | "<=" | "==" | "!=" | "<" | ">", _, _) => Some(simplifyComparison(f.op, f.left, f.right))
           case _ => Some(e)
