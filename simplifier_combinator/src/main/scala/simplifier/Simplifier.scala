@@ -320,8 +320,15 @@ object Simplifier {
 
     def simplifyExpr(e: BinExpr): Option[Node] = {
       val op = e.op
-      val left = getOrEmpty(simplifyNode(e.left))
-      val right = getOrEmpty(simplifyNode(e.right))
+      val tmpLeft = simplifyNode(e.left)
+      val tmpRight = simplifyNode(e.right)
+
+      val left = getOrEmpty(tmpLeft)
+      val right = getOrEmpty(tmpRight)
+
+      if (left == null || left.equals(NodeList(List()))) return tmpRight
+      if (right == null || right.equals(NodeList(List()))) return tmpLeft
+
       val f = BinExpr(op, left, right)
 
       def chooseStrategy(f: BinExpr) =
