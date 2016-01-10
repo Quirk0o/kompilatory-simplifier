@@ -223,12 +223,14 @@ object Simplifier {
         case ("-", IntNum(n), x) if n == 0 => simplifyNode(Unary("-", x))
         // Simplify subtraction of equal values
         case ("-", x, y) if x.equals(y) => Some(IntNum(0))
+        // Check distributive property of multiplication
         case ("+" | "-", BinExpr("*", l, r), x) if l.equals(x) =>
           simplifyNode(BinExpr("*", l, BinExpr(op, r, IntNum(1))))
         case ("+" | "-", BinExpr("*", l1, r1), BinExpr("*", l2, r2)) if l1.equals(l2) =>
           simplifyNode(BinExpr("*", l1, BinExpr(op, r1, r2)))
         case ("+" | "-", BinExpr("*", l1, r1), BinExpr("*", l2, r2)) if r1.equals(r2) =>
           simplifyNode(BinExpr("*", r1, BinExpr(op, l1, l2)))
+        // Simplify operations with constants
         case ("*" | "/", x, IntNum(n)) if n == 1 => Some(x)
         case ("*", IntNum(n), x) if n == 0 => Some(IntNum(0))
         case ("**", x, IntNum(n)) if n == 0 => Some(IntNum(1))
@@ -243,9 +245,12 @@ object Simplifier {
           BinExpr("**", y2, IntNum(c)))
           if x1.equals(x2) && y1.equals(y2) && a == b && b == c && c == 2 =>
             simplifyNode(BinExpr("**", BinExpr("+", x1, y1), IntNum(2)))
+        // Simplify division by equal value
         case ("/", x, y) if x.equals(y) => Some(IntNum(1))
+        // Simplify double division
         case ("/", left, BinExpr("/", x, y))
           if left.equals(x) => simplifyNode(y)
+        // Simplify multiplication by fraction
         case ("*", x, BinExpr("/", IntNum(n), y))
           if n == 1 => simplifyNode(BinExpr("/", x, y))
         case _ => Some(BinExpr(op, left, right))
