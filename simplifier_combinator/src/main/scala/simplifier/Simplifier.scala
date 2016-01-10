@@ -334,13 +334,14 @@ object Simplifier {
     def concatLists(l1: ElemList, l2: ElemList) = ElemList(l1.list.flatMap(simplifyNode) ++ l2.list.flatMap(simplifyNode))
 
     def simplifyExpr(e: BinExpr): Option[Node] = {
+      // Simplify children nodes
       val op = e.op
       val tmpLeft = simplifyNode(e.left)
       val tmpRight = simplifyNode(e.right)
-
       val left = getOrEmpty(tmpLeft)
       val right = getOrEmpty(tmpRight)
 
+      // Check for empty children nodes
       if (left == null || left.equals(NodeList(List()))) return tmpRight
       if (right == null || right.equals(NodeList(List()))) return tmpLeft
 
@@ -357,6 +358,7 @@ object Simplifier {
           case _ => Some(e)
         }
 
+      // Tries to simplify with switched nodes if child node is a binary expression
       def checkCommutativity(e: BinExpr) =
         e.left match {
           case f @ BinExpr(o, _, _) if BinExpr.commutative.contains(o) =>
@@ -367,7 +369,9 @@ object Simplifier {
           case _ => chooseStrategy(BinExpr(e.op, e.left, e.right))
         }
 
+      // Simplify original expression
       val simple = checkCommutativity(f)
+      // Try to perform operations with nodes of an inner binary expression
       getOrEmpty(simple) match {
         case BinExpr(op, left, right) =>
           left match {
@@ -395,6 +399,7 @@ object Simplifier {
       case BinExpr(op, left, right) => BinExpr(op, right, left)
     }
 
+    // Simplifies expression with reversed nodes if possible
     if (BinExpr.commutative.contains(e.op)) {
       val simple = simplifyExpr(e)
       val simpleR = simplifyExpr(reverse(e))
@@ -403,6 +408,11 @@ object Simplifier {
     }
     else simplifyExpr(e)
   }
+
+  /*
+  * Unary expressions
+  * ------------------
+  * */
 
   def simplifyUnary(e: Unary): Option[Node] = {
 
