@@ -125,18 +125,18 @@ object Simplifier {
       case _ => false
     }
 
-    nodes match {
-      case IfInstr(cond, expr) :: tail if cond.equals(TrueConst()) => Some(expr)
-      case ElifInstr(cond, expr) :: tail if cond.equals(TrueConst()) => Some(expr)
-      case head :: tail => evaluateConditions(tail, right)
-      case Nil =>
-        if (allFalse())
-          right
-        else right match {
-          case Some(node) => Some(IfElseInstr(nodes, node))
-          case None => Some(IfElifInstr(nodes))
-        }
+    def evaluate(n: List[Node]): Node = n match {
+      case IfInstr(cond, expr) :: tail if cond.equals(TrueConst()) => expr
+      case ElifInstr(cond, expr) :: tail if cond.equals(TrueConst()) => expr
+      case head :: tail => evaluate(tail)
+      case Nil => right match {
+        case Some(node) => IfElseInstr(nodes, node)
+        case None => IfElifInstr(nodes)
+      }
     }
+
+    if (allFalse()) right
+    else Some(evaluate(nodes))
   }
 
 
